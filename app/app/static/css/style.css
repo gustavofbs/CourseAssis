@@ -1,0 +1,16 @@
+.container {
+    max-width: 600px;
+    margin-top: 50px;
+}
+
+.interests-container {
+    margin-bottom: 20px;
+}
+
+.interest-badge {
+    margin: 5px;
+    padding: 5px 10px;
+    background-color: #e9ecef;
+    border-radius: 15px;
+    display: inline-block;
+}
