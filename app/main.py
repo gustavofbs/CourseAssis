@@ -6,10 +6,10 @@ from fastapi.responses import HTMLResponse
 import json
 import os
 from dotenv import load_dotenv
-from app.patterns.userData_template import WebUserDataCollector
-from app.patterns.dataStorage_factory import SQLiteStorageFactory
+from app.patterns.user_data_template import WebUserDataCollector
+from app.patterns.data_storage_factory import SQLiteStorageFactory
 from app.patterns.recommendation_strategy import RecommendationStrategy
-from app.patterns.studyPlan_template import CourseraStudyPlanGenerator
+from app.patterns.study_plan_template import CourseraStudyPlanGenerator
 from fastapi.exceptions import HTTPException
 
 load_dotenv()
