@@ -6,6 +6,9 @@ from langchain.schema import StrOutputParser
 from typing import List, Dict
 import requests
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class RecommendationStrategy:
     def __init__(self):
