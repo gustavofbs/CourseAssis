@@ -58,3 +58,21 @@ async def submit_form(
         "user_id": user_id,
         "recommendations": recommendations
     }
+
+@app.post("/ask_question")
+async def ask_question(
+    request: Request,
+    question: str = Form(...),
+    course_name: str = Form(...),
+    course_description: str = Form(...)
+):
+    course_context = {
+        "name": course_name,
+        "description": course_description
+    }
+    
+    response = recommendation_strategy.answer_course_question(question, course_context)
+    
+    return {
+        "answer": response
+    }

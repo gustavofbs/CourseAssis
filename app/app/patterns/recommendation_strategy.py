@@ -82,3 +82,30 @@ class RecommendationStrategy:
             print(f"Erro ao buscar cursos do Coursera: {str(e)}")
         
         return coursera_courses
+
+    def answer_course_question(self, question: str, course_context: Dict) -> str:
+        question_template = """
+        Como um especialista em educação, responda à seguinte pergunta sobre um curso:
+
+        Contexto do Curso:
+        Nome: {course_name}
+        Descrição: {course_description}
+
+        Pergunta do usuário: {question}
+
+        Por favor, forneça uma resposta detalhada e útil baseada nas informações disponíveis sobre o curso.
+        """
+        
+        chain = (
+            PromptTemplate.from_template(question_template)
+            | self.llm
+            | StrOutputParser()
+        )
+        
+        response = chain.invoke({
+            "course_name": course_context.get("name", ""),
+            "course_description": course_context.get("description", ""),
+            "question": question
+        })
+        
+        return response
