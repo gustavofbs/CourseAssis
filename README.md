@@ -1,28 +1,113 @@
+# Sistema de Suporte a Estudos
+
+Um sistema completo para auxiliar estudantes em sua jornada de aprendizado, oferecendo planos de estudo personalizados e recomendações inteligentes.
+
+## Funcionalidades Detalhadas
+
+### Recomendações
+- Sugestões de conteúdo baseadas no perfil
+- Recomendações de materiais complementares
+- Ajustes baseados no histórico de estudo
+
+### Planos de Estudo
+- Criação de planos personalizados baseados em objetivos
+- Definição de metas e prazos
+- Adaptação automática baseada no progresso
+
+## Fluxo de Navegação
+
+#### Página Principal
+
+- O usuário escreve o seu nome
+- Especifica os seus interesses de cursos
+- Seleciona o seu nível de experiência
+
+#### Retorno das Recomendações
+
+- Depois que o usuário definiu os seus interesses e o seu nível, será possível interagir com três opções:
+
+  - 1 - Ver o curso diretamente no site da Coursera
+  - 2 - Fazer uma pergunta sobre um curso específico e receber um retorno da IA generativa
+  - 3 - Elaborar um plano de estudos definindo a sua disponibilidade semanal
+
+## Tecnologias Utilizadas
+
+- Backend: FastAPI
+- Frontend: HTML, CSS, JavaScript
+- UI Framework: Bootstrap 5
+- Banco de Dados: SQLite
+- IA: OpenAI via LangChain
+- Gerenciamento de Dependências: Poetry
+
+## Pré-requisitos
+
+- Python 3.12+
+- Poetry para gerenciamento de dependências
+- SQLite3
+- Chave de API OpenAI válida
+
+## Instalação
+
+1. Clone o repositório:
+```bash
+git clone https://github.com/gustavofbs/CourseAssis
+cd app
+```
+
+2. Instale as dependências usando Poetry:
+```bash
+poetry install
+```
+
+## Execução da Aplicação
+
+1. Ative o ambiente virtual do Poetry:
+```bash
+poetry shell
+```
+
+2. Configure as variáveis de ambiente:
+- Crie um arquivo `.env` na raiz do projeto
+- Adicione suas configurações (exemplo):
+```
+OPENAI_API_KEY=sua_chave_api
+```
+
+3. Inicie a aplicação:
+```bash
+poetry run uvicorn main:app --reload
+```
+
+4. Acesse a aplicação em seu navegador:
+```
+http://localhost:8000
+```
+
+## Execução dos Testes
+
+Para executar os testes unitários e de integração:
+
+```bash
+poetry run pytest
+```
+
+Para ver o relatório de cobertura de testes:
+```bash
+poetry run pytest --cov=app
+```
+
 ## Estrutura do Projeto
 
 ```
 CourseAssis/
 ├── app/
-│   ├── __pycache__/
-│   ├── patterns/                               # Padrões utilizados na criação da aplicação
-│   │   ├── __pycache__/
-│   │   ├── dataStorage_factory.py
-│   │   ├── recommendation_strategy.py
-│   │   ├── studyPlan_template.py
-│   │   └── userData_template.py
-│   ├── static/
-│   │   ├── css/
-│   │   └── js/
-│   ├── templates/                              # Interface web através do index.html
-│   │   └── index.html
-│   └── __init__.py
-├── .gitignore
-├── .python-version
-├── data.db
-├── main.py                                     # Aplicação principal
-├── poetry.lock
-├── pyproject.toml
-└── README.md
+│   ├── patterns/        # Implementações de padrões de projeto
+│   ├── static/          # Arquivos estáticos (CSS, JS)
+│   └── templates/       # Templates HTML
+├── tests/               # Testes automatizados
+├── main.py              # Ponto de entrada da aplicação
+├── pyproject.toml       # Configuração do Poetry e dependências
+└── README.md            # README atual
 ```
 
 ## Fase 1: Coleta de Dados do Usuário (Template Method)
@@ -175,51 +260,6 @@ async def ask_question(question: str, course_context: Dict) -> str:
      - `project_percent`: integer
    - Response: JSON com o plano de estudos
 
-## Tecnologias Utilizadas
-
-- Backend: FastAPI
-- Frontend: HTML, CSS, JavaScript
-- UI Framework: Bootstrap 5
-- Banco de Dados: SQLite
-- IA: OpenAI via LangChain
-- Gerenciamento de Dependências: Poetry
-
-## Como Executar
-
-1. Clone o repositório
-```bash
-git clone [URL_DO_REPOSITÓRIO]
-```
-
-2. Instale as dependências usando Poetry
-```bash
-cd app
-poetry install
-```
-
-3. Ative o ambiente virtual do Poetry
-```bash
-poetry shell
-```
-
-4. Configure as variáveis de ambiente no arquivo `.env`
-```bash
-OPENAI_API_KEY=<YOUR_TOKEN>
-```
-
-5. Execute a aplicação
-```bash
-poetry run uvicorn main:app --reload
-```
-
-A aplicação estará disponível em `http://localhost:8000`
-
-## Pré-requisitos
-
-- Python 3.12+
-- Poetry para gerenciamento de dependências
-- SQLite3
-- Chave de API OpenAI válida
 
 ## Aplicação
 
