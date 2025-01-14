@@ -35,9 +35,10 @@ Um sistema completo para auxiliar estudantes em sua jornada de aprendizado, ofer
 - Backend: FastAPI
 - Frontend: HTML, CSS, JavaScript
 - UI Framework: Bootstrap 5
-- Banco de Dados: SQLite
+- Banco de Dados: SQLite com WAL mode
 - IA: OpenAI via LangChain
 - Gerenciamento de Dependências: Poetry
+- Segurança: Cryptography para proteção de dados
 
 ## Pré-requisitos
 
@@ -46,7 +47,7 @@ Um sistema completo para auxiliar estudantes em sua jornada de aprendizado, ofer
 - SQLite3
 - Chave de API OpenAI válida
 
-## Instalação
+## Execução da Aplicação
 
 1. Clone o repositório:
 ```bash
@@ -58,8 +59,6 @@ cd app
 ```bash
 poetry install
 ```
-
-## Execução da Aplicação
 
 1. Ative o ambiente virtual do Poetry:
 ```bash
@@ -99,16 +98,47 @@ poetry run pytest --cov=app
 ## Estrutura do Projeto
 
 ```
-CourseAssis/
+app/
 ├── app/
-│   ├── patterns/        # Implementações de padrões de projeto
-│   ├── static/          # Arquivos estáticos (CSS, JS)
-│   └── templates/       # Templates HTML
-├── tests/               # Testes automatizados
-├── main.py              # Ponto de entrada da aplicação
-├── pyproject.toml       # Configuração do Poetry e dependências
-└── README.md            # README atual
+│   ├── patterns/                       # Implementações de padrões de projeto
+│   │   ├── data_storage_factory.py
+│   │   ├── recommendation_strategy.py
+│   │   ├── study_plan_template.py
+│   │   └── user_data_template.py
+│   ├── security/                       # Módulos de segurança
+│   │   └── db_security.py
+│   ├── static/                         # Arquivos estáticos (CSS, JS)
+│   └── templates/                      # Templates HTML
+├── data/                               # Diretório do banco de dados
+│   ├── data.db                         # Arquivo principal do banco
+│   ├── data.db-shm                     # Arquivo de memória compartilhada (WAL)
+│   └── data.db-wal                     # Write-Ahead Log
+├── tests/                              # Testes automatizados
+├── main.py                             # Ponto de entrada da aplicação
+├── pyproject.toml                      # Configuração do Poetry e dependências
+└── README.md                           # Este arquivo
 ```
+
+## Segurança do Banco de Dados
+
+O projeto implementa várias medidas de segurança para proteger os dados:
+
+### Write-Ahead Logging (WAL)
+- Modo de operação avançado do SQLite que oferece:
+  - Melhor concorrência: permite múltiplas leituras simultâneas
+  - Maior confiabilidade: proteção contra corrupção de dados
+  - Performance aprimorada: escritas mais eficientes
+  - Recuperação automática após falhas
+
+### Proteção de Arquivos
+- Diretório `data/` com permissões restritas
+- Separação de arquivos de banco de dados e configuração
+- Gerenciamento seguro de chaves criptográficas
+
+### Integridade dos Dados
+- Controle de integridade referencial ativo
+- Transações atômicas para operações críticas
+- Backup automático através do sistema WAL
 
 ## Fase 1: Coleta de Dados do Usuário (Template Method)
 
