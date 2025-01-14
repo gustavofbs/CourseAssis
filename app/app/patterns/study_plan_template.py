@@ -7,21 +7,46 @@ class StudyPlanGenerator(ABC):
     def __init__(self):
         self.study_plan = {
             "course_name": "",
+            "description": "",
             "total_hours": 0,
             "weekly_hours": 0,
             "start_date": None,
             "end_date": None,
+            "fundamentals_percent": 0,
+            "development_percent": 0,
+            "project_percent": 0,
             "modules": [],
-            "schedule": []
+            "schedule": [],
+            "weekly_breakdown": []
         }
 
     def create_study_plan(self, course_data: Dict, user_preferences: Dict) -> Dict:
         """Template method que define o algoritmo para criar um plano de estudos"""
+        self._validate_input(course_data, user_preferences)
         self.collect_course_info(course_data)
         self.calculate_timeline(user_preferences)
         self.generate_modules()
         self.create_schedule()
         return self.study_plan
+
+    def _validate_input(self, course_data: Dict, user_preferences: Dict) -> None:
+        """Validates input data"""
+        if not course_data.get("course_name"):
+            raise ValueError("Course name cannot be empty")
+        if not course_data.get("description"):
+            raise ValueError("Course description cannot be empty")
+            
+        required_preferences = ["weekly_hours", "start_date", "end_date", 
+                              "fundamentals_percent", "development_percent", "project_percent"]
+        for field in required_preferences:
+            if field not in user_preferences:
+                raise ValueError(f"Missing required field: {field}")
+                
+        total_percent = (user_preferences.get("fundamentals_percent", 0) + 
+                        user_preferences.get("development_percent", 0) + 
+                        user_preferences.get("project_percent", 0))
+        if total_percent != 100:
+            raise ValueError("Percentages must sum to 100")
 
     @abstractmethod
     def collect_course_info(self, course_data: Dict) -> None:
@@ -51,7 +76,7 @@ class StudyPlanGenerator(ABC):
 
 class CourseraStudyPlanGenerator(StudyPlanGenerator):
     def collect_course_info(self, course_data: Dict) -> None:
-        self.study_plan["course_name"] = course_data.get("name", "")
+        self.study_plan["course_name"] = course_data.get("course_name", "")
         self.study_plan["description"] = course_data.get("description", "")
         # Estimativa padrão de horas totais se não fornecido
         self.study_plan["total_hours"] = course_data.get("total_hours", 40)
@@ -167,6 +192,7 @@ class CourseraStudyPlanGenerator(StudyPlanGenerator):
         current_date = self.start_date
         weekly_hours = self.study_plan["weekly_hours"]
         schedule = []
+        weekly_breakdown = []
 
         for module in self.study_plan["modules"]:
             # Calcular a porcentagem deste módulo
@@ -195,13 +221,26 @@ class CourseraStudyPlanGenerator(StudyPlanGenerator):
             hours_per_topic = module_weekly_hours / len(module["topics"])
             
             for topic in module["topics"]:
-                module_schedule["weekly_activities"].append({
+                activity = {
                     "topic": topic,
                     "hours": round(hours_per_topic, 1),
                     "resources": self.get_resources_by_topic(topic)
+                }
+                module_schedule["weekly_activities"].append(activity)
+                
+                # Adicionar à weekly_breakdown
+                week_number = len(weekly_breakdown) + 1
+                weekly_breakdown.append({
+                    "week": week_number,
+                    "module": module["name"],
+                    "topic": topic,
+                    "hours": round(hours_per_topic, 1),
+                    "start_date": current_date.strftime("%d/%m/%Y"),
+                    "end_date": (current_date + timedelta(days=7)).strftime("%d/%m/%Y")
                 })
+                current_date += timedelta(days=7)
 
             schedule.append(module_schedule)
-            current_date = module_end_date
 
         self.study_plan["schedule"] = schedule
+        self.study_plan["weekly_breakdown"] = weekly_breakdown

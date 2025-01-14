@@ -97,7 +97,7 @@ async def generate_study_plan(
         
         # Preparar os dados do curso
         course_data = {
-            "name": course_name,
+            "course_name": course_name,
             "description": course_description,
             "total_hours": 40  # Estimativa inicial
         }

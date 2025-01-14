@@ -45,4 +45,10 @@ class WebUserDataCollector(UserDataCollector):
         pass
     
     def get_user_data(self):
+        if not self.user_data["name"]:
+            raise ValueError("User name cannot be empty")
+        if not self.user_data["interests"]:
+            raise ValueError("User must have at least one interest")
+        if not self.user_data["experience_level"]:
+            raise ValueError("Experience level must be specified")
         return self.user_data
