@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 import sqlite3
 from typing import Dict, List
+import os
+from pathlib import Path
+from ..security.db_security import DatabaseSecurity
 
 class DataStorage(ABC):
     """Classe abstrata base para armazenamento de dados"""
@@ -26,25 +29,48 @@ class DataStorage(ABC):
         pass
 
 class SQLiteStorage(DataStorage):
-    """Implementação concreta para SQLite"""
+    """Implementação concreta para SQLite com segurança aprimorada"""
     
     def __init__(self, db_path: str):
-        self.db_path = db_path
+        # Garante que o caminho é absoluto e que a pasta data existe
+        if not os.path.isabs(db_path):
+            # Se o caminho começa com ./, remove para normalização
+            if db_path.startswith('./'):
+                db_path = db_path[2:]
+            # Obtém o diretório raiz do projeto
+            base_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+            db_path = os.path.join(base_dir, db_path)
+        
+        # Garante que o diretório do banco de dados existe
+        db_dir = os.path.dirname(db_path)
+        os.makedirs(db_dir, exist_ok=True)
+        
+        self.security = DatabaseSecurity()
+        self.db_path = self.security.secure_database_path(db_path)
         self._create_tables()
+    
+    def _get_connection(self):
+        """Cria uma conexão segura com o banco de dados"""
+        conn = sqlite3.connect(self.db_path)
+        conn.execute("PRAGMA journal_mode=WAL")  # Write-Ahead Logging para melhor concorrência
+        conn.execute("PRAGMA foreign_keys=ON")   # Garante integridade referencial
+        return conn
     
     def _create_tables(self):
         """Cria as tabelas necessárias se não existirem"""
-        with sqlite3.connect(self.db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             
-            # Tabela de usuários
+            # Tabela de usuários com campos adicionais de segurança
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL,
                     interests TEXT NOT NULL,
                     experience_level TEXT NOT NULL,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    last_modified TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    access_count INTEGER DEFAULT 0
                 )
             ''')
             
@@ -63,7 +89,7 @@ class SQLiteStorage(DataStorage):
             conn.commit()
     
     def save_user(self, user_data: Dict) -> int:
-        with sqlite3.connect(self.db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT INTO users (name, interests, experience_level) VALUES (?, ?, ?)',
@@ -73,7 +99,7 @@ class SQLiteStorage(DataStorage):
             return cursor.lastrowid
     
     def save_recommendation(self, user_id: int, recommendation_data: Dict) -> int:
-        with sqlite3.connect(self.db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT INTO recommendations (user_id, content, type) VALUES (?, ?, ?)',
@@ -83,7 +109,7 @@ class SQLiteStorage(DataStorage):
             return cursor.lastrowid
     
     def get_user(self, user_id: int) -> Dict:
-        with sqlite3.connect(self.db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
             user = cursor.fetchone()
@@ -93,12 +119,14 @@ class SQLiteStorage(DataStorage):
                     'name': user[1],
                     'interests': eval(user[2]),  # Converte string de volta para lista
                     'experience_level': user[3],
-                    'created_at': user[4]
+                    'created_at': user[4],
+                    'last_modified': user[5],
+                    'access_count': user[6]
                 }
             return {}
     
     def get_user_recommendations(self, user_id: int) -> List[Dict]:
-        with sqlite3.connect(self.db_path) as conn:
+        with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('SELECT * FROM recommendations WHERE user_id = ?', (user_id,))
             recommendations = cursor.fetchall()

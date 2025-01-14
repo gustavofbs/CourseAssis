@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 # Configurando o storage
-db_path = os.path.join(os.path.dirname(__file__), "data.db")
+db_path = os.getenv('DB_PATH', './data/data.db')
 storage_factory = SQLiteStorageFactory(db_path)
 storage = storage_factory.create_storage()
 recommendation_strategy = RecommendationStrategy()
