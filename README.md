@@ -19,7 +19,7 @@ CourseAssis/
 ├── .gitignore
 ├── .python-version
 ├── data.db
-├── main.py
+├── main.py                                     # Aplicação principal
 ├── poetry.lock
 ├── pyproject.toml
 └── README.md
