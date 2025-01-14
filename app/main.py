@@ -4,8 +4,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import json
 import os
+from dotenv import load_dotenv
 from app.patterns.template_method import WebUserDataCollector
 from app.patterns.factory_method import SQLiteStorageFactory
+from app.patterns.recommendation_strategy import RecommendationStrategy
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -17,6 +21,7 @@ templates = Jinja2Templates(directory="app/templates")
 db_path = os.path.join(os.path.dirname(__file__), "data.db")
 storage_factory = SQLiteStorageFactory(db_path)
 storage = storage_factory.create_storage()
+recommendation_strategy = RecommendationStrategy()
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
@@ -41,8 +46,15 @@ async def submit_form(
     # Usar o Factory Method para salvar os dados
     user_id = storage.save_user(collector.get_user_data())
     
+    # Gerar recomendações personalizadas
+    recommendations = recommendation_strategy.generate_recommendations(collector.get_user_data())
+    
+    # Salvar as recomendações
+    storage.save_recommendation(user_id, recommendations)
+    
     return {
         "message": "Dados recebidos com sucesso!",
         "data": collector.get_user_data(),
-        "user_id": user_id
+        "user_id": user_id,
+        "recommendations": recommendations
     }
